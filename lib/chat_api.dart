@@ -38,7 +38,8 @@ class ChatApi {
   Future<Map<String, dynamic>> _send(String token, String method, Map<String, dynamic>? params) async {
     var jsonString = null;
     if (params != null) {
-      jsonString = Uri.encodeQueryComponent(jsonEncode(params));
+      // jsonString = Uri.encodeQueryComponent(jsonEncode(params));
+      jsonString = jsonEncode(params);
     }
     var result = await _post(
         Uri.https('admin.verbox.ru', '/json/v1.0/$method'),
