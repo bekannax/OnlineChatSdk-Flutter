@@ -4,28 +4,28 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatConfig {
 
-  static void setLastDateTimeNewMessage(String value) {
-    getInstance()._setConfig(ChatConfig.configKeyLastDateTimeNewMessage, value);
+  static void setLastDateTimeNewMessage(String value) async {
+    (await getInstance())._setConfig(ChatConfig.configKeyLastDateTimeNewMessage, value);
   }
 
-  static String getLastDateTimeNewMessage() {
-    return getInstance()._getConfigString(ChatConfig.configKeyLastDateTimeNewMessage, "");
+  static Future<String> getLastDateTimeNewMessage() async {
+    return (await getInstance())._getConfigString(ChatConfig.configKeyLastDateTimeNewMessage, "");
   }
 
-  static void setClientId(String clientId) {
-    getInstance()._setConfig(ChatConfig.configKeyClientId, clientId);
+  static void setClientId(String clientId) async {
+    (await getInstance())._setConfig(ChatConfig.configKeyClientId, clientId);
   }
 
-  static String getClientId() {
-    return getInstance()._getConfigString(ChatConfig.configKeyClientId, "");
+  static Future<String> getClientId() async {
+    return (await getInstance())._getConfigString(ChatConfig.configKeyClientId, "");
   }
 
-  static void setApiToken(String token) {
-    getInstance()._setConfig(ChatConfig.configKeyApiToken, token);
+  static void setApiToken(String token) async {
+    (await getInstance())._setConfig(ChatConfig.configKeyApiToken, token);
   }
 
-  static String getApiToken() {
-    return getInstance()._getConfigString(ChatConfig.configKeyApiToken, "");
+  static Future<String> getApiToken() async {
+    return (await getInstance())._getConfigString(ChatConfig.configKeyApiToken, "");
   }
 
   static const String configKeyApiToken = "apiToken";
@@ -35,11 +35,7 @@ class ChatConfig {
   
   late final SharedPreferences _config;
 
-  ChatConfig() {
-    _init();
-  }
-
-  void _init() async {
+  Future<void> init() async {
     _config = await SharedPreferences.getInstance();
   }
 
@@ -97,8 +93,11 @@ class ChatConfig {
     return result;
   }
 
-  static ChatConfig getInstance() {
-    _instance ??= ChatConfig();
+  static Future<ChatConfig> getInstance() async {
+    if (_instance == null) {
+      _instance = ChatConfig();
+      await _instance!.init();
+    }
     return _instance!;
   }
 }

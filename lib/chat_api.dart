@@ -1,53 +1,58 @@
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'dart:convert';
 
 class ChatApi {
 
-  static Future<void> getNewMessages(String token, String clientId, Function(String result) callback) async {
+  // , Function(Map<String, dynamic> result) callback
+  static Future<Map<String, dynamic>> getNewMessages(String token, String clientId) async {
     final DateFormat formatter = DateFormat('yyyy-MM-dd', 'en');
-    ChatApi()._messages(
+    return await ChatApi()._messages(
       token,
       {
-        "client": {
-          "clientId": clientId
+        'client': {
+          'clientId': clientId
         },
-        "sender": "operator",
-        "status": "unreaded",
-        "dateRange" : {
-          "start": formatter.format(DateTime.now()),
-          "stop": formatter.format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecond - 86400 * 14) )
+        'sender': 'operator',
+        'status': 'unreaded',
+        'dateRange' : {
+          'start': formatter.format(DateTime.now()),
+          'stop': formatter.format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecond - 86400 * 14) )
         }
-      },
-      callback
+      }
     );
   }
 
-  Future<http.Response> _post(String url, String token, Object? body) async {
+  Future<http.Response> _post(Uri uri, String token, Object? body) async {
     return await http.post(
-      Uri.https(url),
+      uri,
       headers: {
-        "X-Token": token,
-        "Content-Type": "application/json"
+        'X-Token': token,
+        'Content-Type': "application/json",
+        'Accept':'application/json'
       },
       body: body
     );
   }
 
-  Future<void> _send(String token, String method, Object? params, Function(String result) callback) async {
+  Future<Map<String, dynamic>> _send(String token, String method, Map<String, dynamic>? params) async {
+    var jsonString = null;
+    if (params != null) {
+      jsonString = Uri.encodeQueryComponent(jsonEncode(params));
+    }
     var result = await _post(
-        'https://admin.verbox.ru/json/v1.0/$method',
+        Uri.https('admin.verbox.ru', '/json/v1.0/$method'),
         token,
-        params
+        jsonString
     );
-    callback(result.body);
+    return jsonDecode(result.body);
   }
 
-  Future<void> _messages(String token, Object? params, Function(String result) callback) async {
-    _send(
+  Future<Map<String, dynamic>> _messages(String token, Map<String, dynamic>? params) async {
+    return await _send(
       token,
       'chat/message/getList',
-      params,
-      callback
+      params
     );
   }
 }

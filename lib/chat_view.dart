@@ -2,12 +2,110 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:intl/intl.dart';
+import 'package:onlinechatsdk/chat_api.dart';
 import 'package:onlinechatsdk/chat_config.dart';
 import 'package:onlinechatsdk/command.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:collection';
 
 class ChatView extends StatelessWidget {
+
+  static Future<Map<String, dynamic>> _getUnreadedMessages(String startDate, String clientId, String token) async {
+    if (token.isEmpty) {
+      return {
+        'success': false,
+        'error': {
+          'code': 0,
+          'descr': 'Не задан token'
+        }
+      };
+    }
+    if (clientId.isEmpty) {
+      return {
+        'success': false,
+        'error': {
+          'code': 0,
+          'descr': 'Не задан clientId'
+        }
+      };
+    }
+
+    Map<String, dynamic> params = {
+      "client": {
+        "clientId": clientId
+      },
+      "sender": "operator",
+      "status": "unreaded",
+      "dateRange": {
+        "start": startDate,
+        "stop": DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())
+      }
+    };
+    
+    var resultGetNewMessages = await ChatApi.getNewMessages(token, clientId);
+    print('_getUnreadedMessages : $resultGetNewMessages');
+
+    // ChatApiMessagesWrapper resultWrapper = new ChatApiMessagesWrapper( (MyJsonObject) new ChatApi().message(token, params) );
+    // if (resultWrapper.getMessages().length() == 0) {
+    // return resultWrapper.getResult();
+    // }
+    //
+    // MyJsonArray unreadedMessages = MyJsonArray.create();
+    // for (int i = 0; i < resultWrapper.getMessages().length(); i++) {
+    // MyJsonObject message = resultWrapper.getMessages().GetJsonObject(i);
+    // if (!message.GetBoolean("isVisibleForClient", true)) {
+    // continue;
+    // }
+    // unreadedMessages.Put(message);
+    // }
+    // if (unreadedMessages.length() == 0) {
+    // return MyJsonObject.create("{\"success\":true,\"data\":[]}");
+    // }
+    // resultWrapper.setMessages(unreadedMessages);
+    // return resultWrapper.getResult();
+    
+    return {};
+  }
+
+  static Future<Object> getUnreadedMessages() async {
+    var clientId = await ChatConfig.getClientId();
+    var apiToken = await ChatConfig.getApiToken();
+    return _getUnreadedMessages(
+      DateFormat('yyyy-MM-dd HH:mm:ss').format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecond - 86400 * 14 )),
+      clientId,
+      apiToken
+    );
+  }
+
+  static String _getNewMessages(String clientId, String token) {
+    // String startDate = ChatConfig.getLastDateTimeNewMessage();
+    // ChatApiMessagesWrapper resultWrapper;
+    // if (startDate.isEmpty()) {
+    //   resultWrapper = new ChatApiMessagesWrapper( (MyJsonObject) getUnreadedMessages(clientId, token, context) );
+    // } else {
+    // resultWrapper = new ChatApiMessagesWrapper( (MyJsonObject) getUnreadedMessages(startDate, clientId, token, context) );
+    // }
+    // if (resultWrapper.getMessages().length() == 0) {
+    // ChatConfig.setLastDateTimeNewMessage( (new ChatSimpleDateFormat()).getCurrent() , context);
+    // return resultWrapper.getResult();
+    // }
+    // MyJsonObject message = resultWrapper.getMessages().GetJsonObject( resultWrapper.getMessages().length() - 1 );
+    // DateFormat formatter = new ChatSimpleDateFormat();
+    // try {
+    // Date date = formatter.parse(message.GetString("dateTime"));
+    // Date newDate = new Date();
+    // newDate.setTime(date.getTime() + 1000);
+    // ChatConfig.setLastDateTimeNewMessage(formatter.format(newDate), context);
+    // } catch (Exception e) {/**/}
+    // return resultWrapper.getResult();
+    return '';
+  }
+
+  static String getNewMessages() {
+    // return _getNewMessages(ChatConfig.getClientId(), ChatConfig.getApiToken());
+    return '';
+  }
 
   final String _eventOperatorSendMessage = "operatorSendMessage";
   final String _eventClientSendMessage = "clientSendMessage";
@@ -27,6 +125,7 @@ class ChatView extends StatelessWidget {
   final String _methodReceiveMessage = "receiveMessage";
   final String _methodSetOperator = "setOperator";
   final String _methodGetContacts = "getContacts";
+  final String _methodGetClientId = "getClientId";
   final String _methodDestroy = "destroy";
   final String _methodSetCallback = "setCallback";
 
@@ -73,7 +172,7 @@ class ChatView extends StatelessWidget {
     required this.onCloseSupport,
     required this.onFullyLoaded
   }) {
-    // ChatConfig.setApiToken(apiToken);
+
   }
 
   String _getSetup() {
@@ -124,8 +223,8 @@ class ChatView extends StatelessWidget {
           onSendRate(data[0]);
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventClientId', callback: (data) {
-          // ChatConfig.setClientId(clientId)
-          print("onClientId: ${data.toString()}");
+          ChatConfig.setClientId(data[0]);
+          ChatConfig.setApiToken(apiToken);
           onClientId(data[0]);
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventCloseSupport', callback: (data) {
@@ -133,6 +232,7 @@ class ChatView extends StatelessWidget {
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventFullyLoaded', callback: (data) {
           onFullyLoaded(data[0]);
+          callJsGetClientId();
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventGetContacts', callback: (data) {
           if (onGetContacts != null) {
@@ -156,7 +256,6 @@ class ChatView extends StatelessWidget {
         return NavigationActionPolicy.CANCEL;
       },
       onLoadStop: (controller, url) async {
-        _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventClientId"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientId", data);}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventOperatorSendMessage"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventOperatorSendMessage", data);}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventClientSendMessage"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientSendMessage", data);}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventClientMakeSubscribe"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientMakeSubscribe", data);}']));
@@ -175,7 +274,7 @@ class ChatView extends StatelessWidget {
 
       },
       onConsoleMessage: (controller, consoleMessage) {
-        print(consoleMessage);
+        // print(consoleMessage);
       },
     );
 
@@ -225,7 +324,11 @@ class ChatView extends StatelessWidget {
 
   void callJsGetContacts(Function(String data) callback) {
     onGetContacts = callback;
-    _callJs(_getScriptCallJsMethod(_methodGetContacts, [Command('function(data){channel_$_eventGetContacts.postMessage(data);}')]));
+    _callJs(_getScriptCallJsMethod(_methodGetContacts, [Command('function(data){window.flutter_inappwebview.callHandler("channel_$_eventGetContacts", data);}')]));
+  }
+
+  void callJsGetClientId() {
+    _callJs(_getScriptCallJsMethod(_methodGetClientId, [Command('function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientId", data);}')]));
   }
 
   void _callJsDestroy() {
