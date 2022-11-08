@@ -6,7 +6,7 @@ class ChatApi {
 
   // , Function(Map<String, dynamic> result) callback
   static Future<Map<String, dynamic>> getNewMessages(String token, String clientId) async {
-    final DateFormat formatter = DateFormat('yyyy-MM-dd', 'en');
+    final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
     return await ChatApi()._messages(
       token,
       {
@@ -24,6 +24,7 @@ class ChatApi {
   }
 
   Future<http.Response> _post(Uri uri, String token, Object? body) async {
+    print('post body : $body');
     return await http.post(
       uri,
       headers: {
@@ -38,8 +39,8 @@ class ChatApi {
   Future<Map<String, dynamic>> _send(String token, String method, Map<String, dynamic>? params) async {
     var jsonString = null;
     if (params != null) {
-      // jsonString = Uri.encodeQueryComponent(jsonEncode(params));
-      jsonString = jsonEncode(params);
+      jsonString = Uri.encodeQueryComponent(jsonEncode(params));
+      // jsonString = jsonEncode(params);
     }
     var result = await _post(
         Uri.https('admin.verbox.ru', '/json/v1.0/$method'),
