@@ -4,15 +4,37 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:intl/intl.dart';
 import 'package:onlinechatsdk/chat_api.dart';
+import 'package:onlinechatsdk/chat_api_messages_wrapper.dart';
 import 'package:onlinechatsdk/chat_config.dart';
+import 'package:onlinechatsdk/chat_date_time.dart';
 import 'package:onlinechatsdk/command.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:collection';
 
 class ChatView extends StatelessWidget {
 
-  static Future<Map<String, dynamic>> _getUnreadedMessages(String startDate, String clientId, String token) async {
-    if (token.isEmpty) {
+  // static Future<Map<String, dynamic>> getNewMessages(String token, String clientId) async {
+  //   final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+  //   return await ChatApi()._messages(
+  //       token,
+  //       jsonEncode({
+  //         'client': {
+  //           'clientId': clientId
+  //         },
+  //         'sender': 'operator',
+  //         'status': 'unreaded',
+  //         'dateRange' : {
+  //           'start': formatter.format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch + 3600000 * 3 - 86400000 * 14) ),
+  //           'stop': formatter.format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch + 3600000 * 3) )
+  //         }
+  //       })
+  //   );
+  // }
+
+  static Future<Map<String, dynamic>> _getUnreadedMessages(String startDate) async {
+    var clientId = await ChatConfig.getClientId();
+    var apiToken = await ChatConfig.getApiToken();
+    if (apiToken.isEmpty) {
       return {
         'success': false,
         'error': {
@@ -31,80 +53,74 @@ class ChatView extends StatelessWidget {
       };
     }
 
-    Map<String, dynamic> params = {
-      "client": {
-        "clientId": clientId
-      },
-      "sender": "operator",
-      "status": "unreaded",
-      "dateRange": {
-        "start": startDate,
-        "stop": DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())
-      }
-    };
-    
-    var resultGetNewMessages = await ChatApi.getNewMessages(token, clientId);
-    print('_getUnreadedMessages : $resultGetNewMessages');
+    final chatDateTime = ChatDateTime();
+    if (startDate.isEmpty) {
+      startDate = chatDateTime.current(-86400000 * 14);
+    }
 
-    // ChatApiMessagesWrapper resultWrapper = new ChatApiMessagesWrapper( (MyJsonObject) new ChatApi().message(token, params) );
-    // if (resultWrapper.getMessages().length() == 0) {
-    // return resultWrapper.getResult();
+    var response = await ChatApi().messages(
+      apiToken,
+      {
+        "client": {
+          "clientId": clientId
+        },
+        "sender": "operator",
+        "status": "unreaded",
+        "dateRange": {
+          "start": startDate,
+          "stop": chatDateTime.current(0)
+        }
+      }
+    );
+
+    // // print('_getUnreadedMessages : $resultGetNewMessages');
+    // if (result['result'] == null ||
+    //     result['result'] !is List<dynamic> ||
+    //     (result['result'] as List<dynamic>).isEmpty
+    // ) {
+    //   return result;
     // }
     //
-    // MyJsonArray unreadedMessages = MyJsonArray.create();
-    // for (int i = 0; i < resultWrapper.getMessages().length(); i++) {
-    // MyJsonObject message = resultWrapper.getMessages().GetJsonObject(i);
-    // if (!message.GetBoolean("isVisibleForClient", true)) {
-    // continue;
-    // }
-    // unreadedMessages.Put(message);
-    // }
-    // if (unreadedMessages.length() == 0) {
-    // return MyJsonObject.create("{\"success\":true,\"data\":[]}");
-    // }
-    // resultWrapper.setMessages(unreadedMessages);
-    // return resultWrapper.getResult();
-    
-    return {};
+    // var resultMessages = (result['messages'] as List<dynamic>);
+    // print('resultMessages : $resultMessages');
+    // print('resultMessagesSize: ${resultMessages.length}');
+
+
+    var resultWrapper = ChatApiMessagesWrapper(response);
+    if (resultWrapper.getMessages().isEmpty) {
+      return resultWrapper.getResult();
+    }
+    List<Map<String, dynamic>> unreadedMessages = [];
+    resultWrapper.getMessages().forEach((element) {
+      if (element["isVisibleForClient"] != null && element["isVisibleForClient"]) {
+        unreadedMessages.add(element);
+      }
+    });
+    resultWrapper.setMessages(unreadedMessages);
+    return resultWrapper.getResult();
   }
 
-  static Future<Object> getUnreadedMessages() async {
-    var clientId = await ChatConfig.getClientId();
-    var apiToken = await ChatConfig.getApiToken();
+  static Future<Map<String, dynamic>> getUnreadedMessages() async {
     return _getUnreadedMessages(
-      DateFormat('yyyy-MM-dd HH:mm:ss').format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecond - 86400 * 14 )),
-      clientId,
-      apiToken
+      '',
     );
   }
 
-  static String _getNewMessages(String clientId, String token) {
-    // String startDate = ChatConfig.getLastDateTimeNewMessage();
-    // ChatApiMessagesWrapper resultWrapper;
-    // if (startDate.isEmpty()) {
-    //   resultWrapper = new ChatApiMessagesWrapper( (MyJsonObject) getUnreadedMessages(clientId, token, context) );
-    // } else {
-    // resultWrapper = new ChatApiMessagesWrapper( (MyJsonObject) getUnreadedMessages(startDate, clientId, token, context) );
-    // }
-    // if (resultWrapper.getMessages().length() == 0) {
-    // ChatConfig.setLastDateTimeNewMessage( (new ChatSimpleDateFormat()).getCurrent() , context);
-    // return resultWrapper.getResult();
-    // }
-    // MyJsonObject message = resultWrapper.getMessages().GetJsonObject( resultWrapper.getMessages().length() - 1 );
-    // DateFormat formatter = new ChatSimpleDateFormat();
-    // try {
-    // Date date = formatter.parse(message.GetString("dateTime"));
-    // Date newDate = new Date();
-    // newDate.setTime(date.getTime() + 1000);
-    // ChatConfig.setLastDateTimeNewMessage(formatter.format(newDate), context);
-    // } catch (Exception e) {/**/}
-    // return resultWrapper.getResult();
-    return '';
-  }
+  static Future<Map<String, dynamic>> getNewMessages() async {
+    String startDate = await ChatConfig.getLastDateTimeNewMessage();
+    Map<String, dynamic> result = await _getUnreadedMessages(startDate);
+    ChatApiMessagesWrapper resultWrapper = ChatApiMessagesWrapper(result);
+    if (resultWrapper.getMessages().isEmpty) {
+      ChatConfig.setLastDateTimeNewMessage( ChatDateTime().current(0) );
+      return resultWrapper.getResult();
+    }
 
-  static String getNewMessages() {
-    // return _getNewMessages(ChatConfig.getClientId(), ChatConfig.getApiToken());
-    return '';
+    Map<String, dynamic> lastMessage = resultWrapper.getMessages()[resultWrapper.getMessages().length - 1];
+    String lastDate = lastMessage['dateTime'];
+    ChatConfig.setLastDateTimeNewMessage(
+        ChatDateTime().getNextDate(lastDate)
+    );
+    return resultWrapper.getResult();
   }
 
   final String _eventOperatorSendMessage = "operatorSendMessage";
