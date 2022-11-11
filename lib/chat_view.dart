@@ -13,24 +13,6 @@ import 'dart:collection';
 
 class ChatView extends StatelessWidget {
 
-  // static Future<Map<String, dynamic>> getNewMessages(String token, String clientId) async {
-  //   final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-  //   return await ChatApi()._messages(
-  //       token,
-  //       jsonEncode({
-  //         'client': {
-  //           'clientId': clientId
-  //         },
-  //         'sender': 'operator',
-  //         'status': 'unreaded',
-  //         'dateRange' : {
-  //           'start': formatter.format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch + 3600000 * 3 - 86400000 * 14) ),
-  //           'stop': formatter.format( DateTime.fromMillisecondsSinceEpoch(DateTime.now().millisecondsSinceEpoch + 3600000 * 3) )
-  //         }
-  //       })
-  //   );
-  // }
-
   static Future<Map<String, dynamic>> _getUnreadedMessages(String startDate) async {
     var clientId = await ChatConfig.getClientId();
     var apiToken = await ChatConfig.getApiToken();
@@ -72,20 +54,6 @@ class ChatView extends StatelessWidget {
         }
       }
     );
-
-    // // print('_getUnreadedMessages : $resultGetNewMessages');
-    // if (result['result'] == null ||
-    //     result['result'] !is List<dynamic> ||
-    //     (result['result'] as List<dynamic>).isEmpty
-    // ) {
-    //   return result;
-    // }
-    //
-    // var resultMessages = (result['messages'] as List<dynamic>);
-    // print('resultMessages : $resultMessages');
-    // print('resultMessagesSize: ${resultMessages.length}');
-
-
     var resultWrapper = ChatApiMessagesWrapper(response);
     if (resultWrapper.getMessages().isEmpty) {
       return resultWrapper.getResult();
@@ -108,6 +76,7 @@ class ChatView extends StatelessWidget {
 
   static Future<Map<String, dynamic>> getNewMessages() async {
     String startDate = await ChatConfig.getLastDateTimeNewMessage();
+    print('getNewMessages - startDart : $startDate');
     Map<String, dynamic> result = await _getUnreadedMessages(startDate);
     ChatApiMessagesWrapper resultWrapper = ChatApiMessagesWrapper(result);
     if (resultWrapper.getMessages().isEmpty) {

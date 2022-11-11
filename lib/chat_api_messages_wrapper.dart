@@ -4,7 +4,7 @@ class ChatApiMessagesWrapper {
   late Map<String, dynamic> _result;
   late List<dynamic> _dataArray;
   late Map<String, dynamic> _data;
-  late List<Map<String, dynamic>> _messages;
+  late List<dynamic> _messages;
 
   ChatApiMessagesWrapper(Map<String, dynamic> response) {
     _result = response;
@@ -15,7 +15,7 @@ class ChatApiMessagesWrapper {
     if (response['result'] == null) {
       return;
     }
-    _dataArray = response['result'] as List<Map<String, dynamic>>;
+    _dataArray = response['result'] as List<dynamic>;
     if (_dataArray.isEmpty) {
       return;
     }
@@ -23,14 +23,14 @@ class ChatApiMessagesWrapper {
     if (_data['messages'] == null) {
       return;
     }
-    _messages = _data["messages"] as List<Map<String, dynamic>>;
+    _messages = _data['messages'] as List<dynamic>;
   }
 
-  List<Map<String, dynamic>> getMessages() {
+  List<dynamic> getMessages() {
     return _messages;
   }
 
-  void setMessages(List<Map<String, dynamic>> messages) {
+  void setMessages(List<dynamic> messages) {
     _messages = messages;
   }
 
