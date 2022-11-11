@@ -70,7 +70,7 @@ chatView.callJsGetContacts(
 
 ## Получение token
 Перейдите в раздел «Интеграция и API - REST API», скопируйте существующий token или добавьте новый.
-![](https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2019-04-01_18-32-22.png?raw=true)
+![](https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2022-11-11_20-54-36.png?raw=true)
 
 ## Получение новых сообщений от оператора
 Для получения новых сообщений, в `ChatView` есть два статичных метода **getUnreadedMessages** и **getNewMessages**.
@@ -88,4 +88,4 @@ Map<String, dynamic> data = await ChatView.getUnreadedMessages();
 
 Подробное описание можно прочесть в разделе «Интеграция и API - REST API - Инструкции по подключению».
 
-![](https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2020-08-14_19-05-48.png?raw=true)
+![](https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2022-11-11_20-55-08.png?raw=true)
