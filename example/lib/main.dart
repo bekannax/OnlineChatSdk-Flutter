@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'OnlineChatSdk-Flutter Demo',
       home: ChatView(
-        id: "",
-        domain: "",
+        id: "593adecd804fc4e32e7e865d659f2356",
+        domain: "sms-tx.ru",
         language: "ru",
         clientId: "",
         apiToken: "",
