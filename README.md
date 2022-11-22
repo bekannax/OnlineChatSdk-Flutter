@@ -6,7 +6,7 @@ onlinechatsdk:
     path: ./../OnlineChatSdk-Flutter-0.0.1
 ```
 
-В SDK используется библиотека [flutter_inappwebview](https://github.com/pichillilorenzo/flutter_inappwebview) версии 6.0. Пока данная библиотека в pub.dev недоступа. Поэтому нужно скачать исходники с github и добавить библиотеку через path:
+В SDK используется библиотека [flutter_inappwebview](https://github.com/pichillilorenzo/flutter_inappwebview) версии 6.0. Пока данная библиотека в pub.dev недоступа. Поэтому нужно скачать исходники с github и добавить её через path:
 
 ```groovy
 flutter_inappwebview:
