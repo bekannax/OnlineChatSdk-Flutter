@@ -130,13 +130,14 @@ class ChatView extends StatelessWidget {
   void Function(String data)? onGetContacts = null;
   var destroyed = false;
 
-  final InAppWebViewSettings _settings = InAppWebViewSettings(
-      useShouldOverrideUrlLoading: true,
-      mediaPlaybackRequiresUserGesture: false,
-      allowsInlineMediaPlayback: true,
-      iframeAllow: "camera; microphone",
-      iframeAllowFullscreen: true
-  );
+  // only version 6.0
+  // final InAppWebViewSettings _settings = InAppWebViewSettings(
+  //     useShouldOverrideUrlLoading: true,
+  //     mediaPlaybackRequiresUserGesture: false,
+  //     allowsInlineMediaPlayback: true,
+  //     iframeAllow: "camera; microphone",
+  //     iframeAllowFullscreen: true
+  // );
 
   InAppWebViewController? _webViewController;
   InAppWebView? _chatWebView;
@@ -183,16 +184,47 @@ class ChatView extends StatelessWidget {
     return result.toString();
   }
 
+  Map<String, dynamic> getSetupObj() {
+    StringBuffer setup = StringBuffer();
+    if (language.isNotEmpty) {
+      setup.write('{');
+      setup.write('"language":"$language"');
+    }
+    if (clientId.isNotEmpty) {
+      if (setup.isEmpty) {
+        setup.write('{');
+      } else {
+        setup.write(',');
+      }
+      setup.write('"clientId":"$clientId"');
+    }
+    if (setup.isNotEmpty) {
+      setup.write('}');
+      return {
+        'setup': setup.toString(),
+        'sdk-show-close-button': '1'
+      };
+    }
+    return {
+      'sdk-show-close-button': '1'
+    };
+  }
+
   String _getWidgetUrl() {
     return 'https://admin.verbox.ru/support/chat/$id/$domain${_getSetup()}';
+  }
+
+  Uri _getWidgetUrlObj() {
+    return Uri.https('admin.verbox.ru', '/support/chat/$id/$domain', getSetupObj());
   }
 
   @override
   Widget build(BuildContext context) {
     _chatWebView = InAppWebView(
-      initialUrlRequest: URLRequest(url: WebUri( _getWidgetUrl() )),
+      // initialUrlRequest: URLRequest(url: WebUri( _getWidgetUrl() )),  // only version 6.0
+      initialUrlRequest: URLRequest(url: _getWidgetUrlObj() ),
       initialUserScripts: UnmodifiableListView<UserScript>([]),
-      initialSettings: _settings,
+      // initialSettings: _settings,  // only version 6.0
       onWebViewCreated: (controller) async {
         _webViewController = controller;
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventOperatorSendMessage', callback: (data) {
@@ -232,11 +264,14 @@ class ChatView extends StatelessWidget {
       onLoadStart: (controller, url) async {
 
       },
-      onPermissionRequest: (controller, request) async {
-        return PermissionResponse(
-            resources: request.resources,
-            action: PermissionResponseAction.GRANT);
-      },
+
+      // only version 6.0
+      // onPermissionRequest: (controller, request) async {
+      //   return PermissionResponse(
+      //       resources: request.resources,
+      //       action: PermissionResponseAction.GRANT);
+      // },
+
       // shouldOverrideUrlLoading: (controller, navigationAction) async {
       //   if (navigationAction.request.url != null) {
       //     _launchInBrowser(navigationAction.request.url!);
@@ -246,32 +281,18 @@ class ChatView extends StatelessWidget {
 
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         var uri = navigationAction.request.url!;
-
-        print('test : 1');
-
         if ([ Uri.encodeFull( _getWidgetUrl() ) ].contains(uri.toString())) {
-          print('test : 2');
           return NavigationActionPolicy.ALLOW;
         }
-
         if (['http', 'https'].contains(uri.scheme)) {
-
-          print('test : 3');
-
           await _launchInBrowser(uri);
           return NavigationActionPolicy.CANCEL;
         } else if (!['file', 'chrome', 'data', 'javascript', 'about'].contains(uri.scheme)) {
-          print('test : 4');
           if (await canLaunchUrl(uri)) {
-
-            print('test : 5');
-
             await launchUrl(uri);
             return NavigationActionPolicy.CANCEL;
           }
         }
-
-        print('test : 6');
         return NavigationActionPolicy.ALLOW;
       },
 
@@ -284,9 +305,9 @@ class ChatView extends StatelessWidget {
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventCloseSupport"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventCloseSupport", "");}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventFullyLoaded"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventFullyLoaded", "");}']));
       },
-      onReceivedError: (controller, request, error) {
-
-      },
+      // onReceivedError: (controller, request, error) {
+      //
+      // },
       onProgressChanged: (controller, progress) {
 
       },
