@@ -6,13 +6,6 @@ onlinechatsdk:
     path: ./../OnlineChatSdk-Flutter-0.0.1
 ```
 
-В SDK используется [flutter_inappwebview](https://github.com/pichillilorenzo/flutter_inappwebview) версии 6.0. Данная версия в pub.dev пока недоступа, поэтому нужно скачать исходники с github и добавить библиотеку через path:
-
-```groovy
-flutter_inappwebview:
-    path: ./../flutter_inappwebview-6.0.0-beta.12
-```
-
 ## Получение id
 Перейдите в раздел «Online чат - Ваш сайт - Настройки - Установка» и скопируйте значение переменной id.
 ![](https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2019-03-21_16-53-28.png?raw=true)
