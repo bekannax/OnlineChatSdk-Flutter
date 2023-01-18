@@ -264,13 +264,13 @@ class ChatView extends StatelessWidget {
 
       },
 
-      onLoadError: (InAppWebViewController controller, Uri? url, int code, String message) async {
-        print("onLoadError ------------ ");
-      },
-
-      onLoadHttpError: (InAppWebViewController controller, Uri? url, int statusCode, String description) async {
-        print("onLoadHttpError ------------ ");
-      },
+      // onLoadError: (InAppWebViewController controller, Uri? url, int code, String message) async {
+      //   print("onLoadError ------------ ");
+      // },
+      //
+      // onLoadHttpError: (InAppWebViewController controller, Uri? url, int statusCode, String description) async {
+      //   print("onLoadHttpError ------------ ");
+      // },
 
       // only version 6.0
       // onPermissionRequest: (controller, request) async {
