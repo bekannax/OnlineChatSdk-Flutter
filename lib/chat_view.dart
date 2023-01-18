@@ -76,7 +76,6 @@ class ChatView extends StatelessWidget {
 
   static Future<Map<String, dynamic>> getNewMessages() async {
     String startDate = await ChatConfig.getLastDateTimeNewMessage();
-    print('getNewMessages - startDart : $startDate');
     Map<String, dynamic> result = await _getUnreadedMessages(startDate);
     ChatApiMessagesWrapper resultWrapper = ChatApiMessagesWrapper(result);
     if (resultWrapper.getMessages().isEmpty) {
@@ -263,6 +262,14 @@ class ChatView extends StatelessWidget {
       },
       onLoadStart: (controller, url) async {
 
+      },
+
+      onLoadError: (InAppWebViewController controller, Uri? url, int code, String message) async {
+        print("onLoadError ------------ ");
+      },
+
+      onLoadHttpError: (InAppWebViewController controller, Uri? url, int statusCode, String description) async {
+        print("onLoadHttpError ------------ ");
       },
 
       // only version 6.0
