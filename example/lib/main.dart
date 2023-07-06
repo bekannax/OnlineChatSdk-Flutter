@@ -12,6 +12,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    String newCss = ".widget-header.draggable {" +
+        "display: none !important;" +
+        "}";
+
     return MaterialApp(
       title: 'OnlineChatSdk-Flutter Demo',
       home: ChatView(
@@ -20,6 +24,7 @@ class MyApp extends StatelessWidget {
         language: "ru",
         clientId: "",
         apiToken: "",
+        css: newCss,
         onOperatorSendMessage: (String data) {},
         onClientSendMessage: (String data) {},
         onClientMakeSubscribe: (String data) {},

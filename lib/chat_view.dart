@@ -118,6 +118,7 @@ class ChatView extends StatelessWidget {
   final String language;
   final String clientId;
   final String apiToken;
+  final String css;
   final void Function(String data) onOperatorSendMessage;
   final void Function(String data) onClientSendMessage;
   final void Function(String data) onClientMakeSubscribe;
@@ -148,6 +149,7 @@ class ChatView extends StatelessWidget {
     required this.language,
     required this.clientId,
     required this.apiToken,
+          required this.css,
     required this.onOperatorSendMessage,
     required this.onClientSendMessage,
     required this.onClientMakeSubscribe,
@@ -227,8 +229,8 @@ class ChatView extends StatelessWidget {
       onWebViewCreated: (controller) async {
         _webViewController = controller;
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventOperatorSendMessage', callback: (data) {
-          onOperatorSendMessage(data[0]);
-        });
+        onOperatorSendMessage(data[0]);
+      });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventClientSendMessage', callback: (data) {
           onClientSendMessage(data[0]);
         });
@@ -304,6 +306,7 @@ class ChatView extends StatelessWidget {
       },
 
       onLoadStop: (controller, url) async {
+                injectCss(css);
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventOperatorSendMessage"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventOperatorSendMessage", data);}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventClientSendMessage"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientSendMessage", data);}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventClientMakeSubscribe"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientMakeSubscribe", data);}']));
@@ -331,6 +334,22 @@ class ChatView extends StatelessWidget {
           child: _chatWebView!
       ),
     );
+  }
+
+  void injectCss(String style) {
+    if (style.isEmpty) {
+      return;
+    }
+
+    String injectCssTemplate = "(function() {" +
+        "var parent = document.getElementsByTagName('head').item(0);" +
+        "var style = document.createElement('style');" +
+        "style.type = 'text/css';" +
+        "style.innerHTML = '$style';" +
+        "parent.appendChild(style);" +
+  "})()";
+
+    _callJs(injectCssTemplate);
   }
 
   Future<void> _launchInBrowser(Uri url) async {
