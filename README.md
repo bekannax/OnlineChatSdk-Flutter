@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         language: "ru",
         clientId: "",
         apiToken: "<Токен для доступа к Rest Api>",
+        css: "",
         onOperatorSendMessage: (String data) {}, //  оператор отправил сообщение посетителю.
         onClientSendMessage: (String data) {}, // посетитель отправил сообщение оператору
         onClientMakeSubscribe: (String data) {}, // посетитель заполнил форму
