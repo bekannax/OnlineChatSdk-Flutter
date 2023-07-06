@@ -3,7 +3,7 @@
 ## Добавление в проект
 ```groovy
 onlinechatsdk:
-    path: ./../OnlineChatSdk-Flutter-0.0.2
+    path: ./../OnlineChatSdk-Flutter-0.0.3
 ```
 
 ## Получение id
