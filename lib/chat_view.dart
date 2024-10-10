@@ -131,13 +131,13 @@ class ChatView extends StatelessWidget {
   var destroyed = false;
 
   // only version 6.0
-  // final InAppWebViewSettings _settings = InAppWebViewSettings(
-  //     useShouldOverrideUrlLoading: true,
-  //     mediaPlaybackRequiresUserGesture: false,
-  //     allowsInlineMediaPlayback: true,
-  //     iframeAllow: "camera; microphone",
-  //     iframeAllowFullscreen: true
-  // );
+  final InAppWebViewSettings _settings = InAppWebViewSettings(
+      useShouldOverrideUrlLoading: true,
+      mediaPlaybackRequiresUserGesture: false,
+      allowsInlineMediaPlayback: true,
+      iframeAllow: "camera; microphone",
+      iframeAllowFullscreen: true
+  );
 
   InAppWebViewController? _webViewController;
   InAppWebView? _chatWebView;
@@ -222,10 +222,10 @@ class ChatView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _chatWebView = InAppWebView(
-      // initialUrlRequest: URLRequest(url: WebUri( _getWidgetUrl() )),  // only version 6.0
-      initialUrlRequest: URLRequest(url: _getWidgetUrlObj() ),
+      initialUrlRequest: URLRequest(url: WebUri( _getWidgetUrl() )),  // only version 6.0
+      //initialUrlRequest: URLRequest(url: _getWidgetUrlObj() ),
       initialUserScripts: UnmodifiableListView<UserScript>([]),
-      // initialSettings: _settings,  // only version 6.0
+      initialSettings: _settings,  // only version 6.0
       onWebViewCreated: (controller) async {
         _webViewController = controller;
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventOperatorSendMessage', callback: (data) {
@@ -275,11 +275,11 @@ class ChatView extends StatelessWidget {
       // },
 
       // only version 6.0
-      // onPermissionRequest: (controller, request) async {
-      //   return PermissionResponse(
-      //       resources: request.resources,
-      //       action: PermissionResponseAction.GRANT);
-      // },
+      onPermissionRequest: (controller, request) async {
+        return PermissionResponse(
+            resources: request.resources,
+            action: PermissionResponseAction.GRANT);
+      },
 
       // shouldOverrideUrlLoading: (controller, navigationAction) async {
       //   if (navigationAction.request.url != null) {
