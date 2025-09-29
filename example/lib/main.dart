@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
       onSendRate: (String data) {},
       onClientId: (String data) {},
       onCloseSupport: () {},
+      isShowCloseButton: true,
       onFullyLoaded: (String data) {
         // chat.injectCss(newCss);
         chat.callJsSetClientInfo("{name: \"Имя\", email: \"test@mail.ru\"}");
