@@ -120,7 +120,8 @@ class ChatView extends StatelessWidget {
   final String clientId;
   final String apiToken;
   final String css;
-  final bool safeArea ;
+  final bool safeArea;
+  final bool isShowCloseButton;
   final void Function(String data) onOperatorSendMessage;
   final void Function(String data) onClientSendMessage;
   final void Function(String data) onClientMakeSubscribe;
@@ -153,6 +154,7 @@ class ChatView extends StatelessWidget {
     required this.apiToken,
           required this.css,
     this.safeArea = true,
+    this.isShowCloseButton = true,
     required this.onOperatorSendMessage,
     required this.onClientSendMessage,
     required this.onClientMakeSubscribe,
@@ -206,12 +208,19 @@ class ChatView extends StatelessWidget {
       setup.write('}');
       return {
         'setup': setup.toString(),
-        'sdk-show-close-button': '1'
+        'sdk-show-close-button': _isShowCloseButton()
       };
     }
     return {
-      'sdk-show-close-button': '1'
+      'sdk-show-close-button': _isShowCloseButton()
     };
+  }
+
+  String _isShowCloseButton() {
+    if (isShowCloseButton) {
+      return '1';
+    }
+    return '0';
   }
 
   String _getWidgetUrl() {
