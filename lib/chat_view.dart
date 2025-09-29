@@ -1,8 +1,7 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'dart:ffi';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:intl/intl.dart';
 import 'package:onlinechatsdk/chat_api.dart';
 import 'package:onlinechatsdk/chat_api_messages_wrapper.dart';
 import 'package:onlinechatsdk/chat_config.dart';
@@ -10,6 +9,8 @@ import 'package:onlinechatsdk/chat_date_time.dart';
 import 'package:onlinechatsdk/command.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:collection';
+
+String _widgetDomain = "";
 
 class ChatView extends StatelessWidget {
 
@@ -119,6 +120,7 @@ class ChatView extends StatelessWidget {
   final String clientId;
   final String apiToken;
   final String css;
+  final bool safeArea ;
   final void Function(String data) onOperatorSendMessage;
   final void Function(String data) onClientSendMessage;
   final void Function(String data) onClientMakeSubscribe;
@@ -131,13 +133,13 @@ class ChatView extends StatelessWidget {
   var destroyed = false;
 
   // only version 6.0
-  // final InAppWebViewSettings _settings = InAppWebViewSettings(
-  //     useShouldOverrideUrlLoading: true,
-  //     mediaPlaybackRequiresUserGesture: false,
-  //     allowsInlineMediaPlayback: true,
-  //     iframeAllow: "camera; microphone",
-  //     iframeAllowFullscreen: true
-  // );
+  final InAppWebViewSettings _settings = InAppWebViewSettings(
+      useShouldOverrideUrlLoading: true,
+      mediaPlaybackRequiresUserGesture: false,
+      allowsInlineMediaPlayback: true,
+      iframeAllow: "camera; microphone",
+      iframeAllowFullscreen: true
+  );
 
   InAppWebViewController? _webViewController;
   InAppWebView? _chatWebView;
@@ -150,6 +152,7 @@ class ChatView extends StatelessWidget {
     required this.clientId,
     required this.apiToken,
           required this.css,
+    this.safeArea = true,
     required this.onOperatorSendMessage,
     required this.onClientSendMessage,
     required this.onClientMakeSubscribe,
@@ -162,28 +165,28 @@ class ChatView extends StatelessWidget {
 
   }
 
-  String _getSetup() {
-    StringBuffer result = StringBuffer();
-    result.write('?');
-    if (language.isNotEmpty) {
-      result.write('setup={');
-      result.write('"language":"$language"');
-    }
-    if (clientId.isNotEmpty) {
-      if (result.isEmpty) {
-        result.write('setup={');
-      } else {
-        result.write(',');
-      }
-      result.write('"clientId":"$clientId"');
-    }
-    if (result.isNotEmpty) {
-      result.write('}');
-      result.write('&');
-    }
-    result.write("sdk-show-close-button=1");
-    return result.toString();
-  }
+  // String _getSetup() {
+  //   StringBuffer result = StringBuffer();
+  //   result.write('?');
+  //   if (language.isNotEmpty) {
+  //     result.write('setup={');
+  //     result.write('"language":"$language"');
+  //   }
+  //   if (clientId.isNotEmpty) {
+  //     if (result.isEmpty) {
+  //       result.write('setup={');
+  //     } else {
+  //       result.write(',');
+  //     }
+  //     result.write('"clientId":"$clientId"');
+  //   }
+  //   if (result.isNotEmpty) {
+  //     result.write('}');
+  //     result.write('&');
+  //   }
+  //   result.write("sdk-show-close-button=1");
+  //   return result.toString();
+  // }
 
   Map<String, dynamic> getSetupObj() {
     StringBuffer setup = StringBuffer();
@@ -212,52 +215,60 @@ class ChatView extends StatelessWidget {
   }
 
   String _getWidgetUrl() {
-    return 'https://admin.verbox.ru/support/chat/$id/$domain${_getSetup()}';
+    return 'https://${_widgetDomain}/support/chat/$id/'; //$domain${_getSetup()}
   }
 
-  Uri _getWidgetUrlObj() {
-    return Uri.https('admin.verbox.ru', '/support/chat/$id/$domain', getSetupObj());
+  // only version 6.0
+  WebUri _getWidgetUrlObj() {
+    return  WebUri.uri( Uri.https(_widgetDomain, '/support/chat/$id/$domain', getSetupObj()) );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _chatWebView = InAppWebView(
-      // initialUrlRequest: URLRequest(url: WebUri( _getWidgetUrl() )),  // only version 6.0
-      initialUrlRequest: URLRequest(url: _getWidgetUrlObj() ),
+  Future<String> _initWidgetDomain() async {
+    _widgetDomain = await ChatApi().getDomain();
+    return _widgetDomain;
+  }
+
+  Widget _getChatWidget() {
+    return InAppWebView(
+      initialUrlRequest: URLRequest(url: _getWidgetUrlObj()),  // only version 6.0
+      // initialUrlRequest: URLRequest(url: _getWidgetUrlObj() ),
       initialUserScripts: UnmodifiableListView<UserScript>([]),
-      // initialSettings: _settings,  // only version 6.0
+      initialSettings: _settings,  // only version 6.0
       onWebViewCreated: (controller) async {
         _webViewController = controller;
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventOperatorSendMessage', callback: (data) {
-        onOperatorSendMessage(data[0]);
-      });
+          onOperatorSendMessage( data.isNotEmpty ? data[0] : "" );
+        });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventClientSendMessage', callback: (data) {
-          onClientSendMessage(data[0]);
+          onClientSendMessage( data.isNotEmpty ? data[0] : "" );
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventClientMakeSubscribe', callback: (data) {
-          onClientMakeSubscribe(data[0]);
+          onClientMakeSubscribe( data.isNotEmpty ? data[0] : "" );
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventContactsUpdated', callback: (data) {
-          onContactsUpdated(data[0]);
+          onContactsUpdated( data.isNotEmpty ? data[0].toString() : "" );
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventSendRate', callback: (data) {
-          onSendRate(data[0]);
+          onSendRate( data.isNotEmpty ? data[0] : "" );
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventClientId', callback: (data) {
-          ChatConfig.setClientId(data[0]);
+          if (data.isNotEmpty) {
+            ChatConfig.setClientId(data[0]);
+          }
           ChatConfig.setApiToken(apiToken);
-          onClientId(data[0]);
+          onClientId( data.isNotEmpty ? data[0] : "" );
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventCloseSupport', callback: (data) {
           _destroy();
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventFullyLoaded', callback: (data) {
-          onFullyLoaded(data[0]);
+          injectCss(css);
+          onFullyLoaded( data.isNotEmpty ? data[0] : "" );
           callJsGetClientId();
         });
         _webViewController!.addJavaScriptHandler(handlerName: 'channel_$_eventGetContacts', callback: (data) {
           if (onGetContacts != null) {
-            onGetContacts!(data[0]);
+            onGetContacts!( data.isNotEmpty ? data[0] : "" );
             onGetContacts = null;
           }
         });
@@ -275,11 +286,11 @@ class ChatView extends StatelessWidget {
       // },
 
       // only version 6.0
-      // onPermissionRequest: (controller, request) async {
-      //   return PermissionResponse(
-      //       resources: request.resources,
-      //       action: PermissionResponseAction.GRANT);
-      // },
+      onPermissionRequest: (controller, request) async {
+        return PermissionResponse(
+          resources: request.resources,
+          action: PermissionResponseAction.GRANT);
+      },
 
       // shouldOverrideUrlLoading: (controller, navigationAction) async {
       //   if (navigationAction.request.url != null) {
@@ -290,9 +301,12 @@ class ChatView extends StatelessWidget {
 
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         var uri = navigationAction.request.url!;
-        if ([ Uri.encodeFull( _getWidgetUrl() ) ].contains(uri.toString())) {
+        if (uri.toString().contains( Uri.encodeFull( _getWidgetUrl() ) )) {
           return NavigationActionPolicy.ALLOW;
         }
+        // if ([ _getWidgetUrl() ].contains(uri.toString())) {
+        //   return NavigationActionPolicy.ALLOW;
+        // }
         if (['http', 'https'].contains(uri.scheme)) {
           await _launchInBrowser(uri);
           return NavigationActionPolicy.CANCEL;
@@ -306,7 +320,7 @@ class ChatView extends StatelessWidget {
       },
 
       onLoadStop: (controller, url) async {
-                injectCss(css);
+        // injectCss(css);
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventOperatorSendMessage"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventOperatorSendMessage", data);}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventClientSendMessage"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientSendMessage", data);}']));
         _callJs(_getScriptCallJs(['"$_methodSetCallback"', '"$_eventClientMakeSubscribe"', 'function(data){window.flutter_inappwebview.callHandler("channel_$_eventClientMakeSubscribe", data);}']));
@@ -328,11 +342,48 @@ class ChatView extends StatelessWidget {
         // print(consoleMessage);
       },
     );
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    var _view = FutureBuilder(
+      future: _initWidgetDomain(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          Future.delayed(Duration.zero, () {
+            showOkAlertDialog(
+              context: context,
+              title: "Error",
+              message: snapshot.error.toString()
+            ).then((value) {
+              Navigator.of(context);
+            });
+          });
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Container()
+          );
+        } else if (!snapshot.hasData) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else {
+          return _getChatWidget();
+        }
+      },
+    );
+    Widget child = _view;
+    if (safeArea) {
+       child = SafeArea(
+         child: child
+       );
+    }
     return Scaffold(
-      body: SafeArea(
-          child: _chatWebView!
-      ),
+      backgroundColor: Colors.white,
+      body: child
     );
   }
 
@@ -347,7 +398,7 @@ class ChatView extends StatelessWidget {
         "style.type = 'text/css';" +
         "style.innerHTML = '$style';" +
         "parent.appendChild(style);" +
-  "})()";
+    "})()";
 
     _callJs(injectCssTemplate);
   }

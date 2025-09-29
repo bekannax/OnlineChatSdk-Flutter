@@ -21,7 +21,9 @@ class ChatConfig {
   }
 
   static void setApiToken(String token) async {
-    (await getInstance())._setConfig(ChatConfig.configKeyApiToken, token);
+    if (token.isNotEmpty) {
+      (await getInstance())._setConfig(ChatConfig.configKeyApiToken, token);
+    }
   }
 
   static Future<String> getApiToken() async {

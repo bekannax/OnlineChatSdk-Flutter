@@ -1,10 +1,8 @@
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 import 'dart:convert';
 
 class ChatApi {
 
-  // , Function(Map<String, dynamic> result) callback
   Future<http.Response> _post(Uri uri, String token, Object? body) async {
     String? jsonBody;
     if (body != null) {
@@ -24,7 +22,7 @@ class ChatApi {
 
   Future<Map<String, dynamic>> _send(String token, String method, Map<String, dynamic>? params) async {
     var result = await _post(
-        Uri.https('admin.verbox.ru', '/json/v1.0/$method'),
+        Uri.https(await getDomain(), '/json/v1.0/$method'),
         token,
         params
     );
@@ -37,5 +35,21 @@ class ChatApi {
       'chat/message/getList',
       params
     );
+  }
+
+  Future<String> getDomain() async {
+    var response = await http.get(
+      Uri.https('operator.me-talk.ru', '/cabinet/assets/operatorApplication/checkConnection.json'),
+    );
+    if (response.statusCode == 200) {
+      return 'admin.verbox.ru';
+    }
+    response = await http.get(
+      Uri.https('operator.me-talk.ru', '/cabinet/assets/operatorApplication/checkConnection.json'),
+    );
+    if (response.statusCode == 200) {
+      return 'admin.verbox.me';
+    }
+    return 'admin.verbox.ru';
   }
 }
