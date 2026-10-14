@@ -157,7 +157,7 @@ class ChatView extends StatelessWidget {
   final void Function() onCloseSupport;
   final void Function(String data) onFullyLoaded;
   final int textZoom;
-  final _ChatViewController _controller = _ChatViewController(); // test
+  final _ChatViewController _controller = _ChatViewController();
 
   ChatView({
     super.key,

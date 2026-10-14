@@ -2,8 +2,9 @@
 
 ## Добавление в проект
 ```groovy
-onlinechatsdk:
-    path: ./../OnlineChatSdk-Flutter-0.0.6
+  onlinechatsdk:
+    git:
+      url: https://github.com/bekannax/OnlineChatSdk-Flutter.git
 ```
 
 ## Получение id
