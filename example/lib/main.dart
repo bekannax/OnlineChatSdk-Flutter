@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:onlinechatsdk/chat_view.dart';
 
 void main() {
@@ -26,14 +26,13 @@ class MyApp extends StatelessWidget {
     newCss = "";
 
     chat = ChatView(
-      id: "593adecd804fc4e32e7e865d659f2356",
+      id: "",
       domain: "demo.ru",
       language: "ru",
       clientId: "",
-      apiToken: "",
       css: newCss,
-      onOperatorSendMessage: (String data) {},
-      onClientSendMessage: (String data) {},
+      onOperatorSendMessage: (data) {},
+      onClientSendMessage: (data) {},
       onClientMakeSubscribe: (String data) {},
       onContactsUpdated: (String data) {},
       onSendRate: (String data) {},
@@ -46,6 +45,8 @@ class MyApp extends StatelessWidget {
         // chat.callJsSetClientInfo("{name: \"${it.name}\", email: \"${it.email}\", phone: \"${it.phone}\"}")
       },
       safeArea: true,
+      onUnreadedMessagesCountUpdated: (data) {},
+      textZoom: 100,
     );
 
     return MaterialApp(

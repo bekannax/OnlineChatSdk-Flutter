@@ -1,12 +1,13 @@
 
-class ChatApiMessagesWrapper {
+@Deprecated("")
+class ChatApiMessagesWrapperOld {
 
   late Map<String, dynamic> _result;
   late List<dynamic> _dataArray;
   late Map<String, dynamic> _data;
   late List<dynamic> _messages;
 
-  ChatApiMessagesWrapper(Map<String, dynamic> response) {
+  ChatApiMessagesWrapperOld(Map<String, dynamic> response) {
     _result = response;
     _dataArray = [];
     _data = {};

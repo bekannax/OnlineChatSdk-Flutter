@@ -3,7 +3,7 @@
 ## Добавление в проект
 ```groovy
 onlinechatsdk:
-    path: ./../OnlineChatSdk-Flutter-0.0.5
+    path: ./../OnlineChatSdk-Flutter-0.0.6
 ```
 
 ## Получение id
@@ -70,24 +70,44 @@ chatView.callJsGetContacts(
 ```
 Подробное описание методов можно прочесть в разделе «Интеграция и API - Javascript API».
 
-## Получение token
-Перейдите в раздел «Интеграция и API - REST API», скопируйте существующий token или добавьте новый.
-![](https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2022-11-11_20-54-36.png?raw=true)
+## Получение количества новых сообщений от оператора
 
-## Получение новых сообщений от оператора
-Для получения новых сообщений, в `ChatView` есть два статичных метода **getUnreadedMessages** и **getNewMessages**.
+Чтобы получить информацию о новых сообщениях, когда виджет не запущен, в `ChatView` есть статичный метод **getUnreadMessagesCount**.
 
-**getUnreadedMessages** - возвращает все непрочитанные сообщения.
+При успешном запросе метод возвращает `ChatApiGetClientUnreadMessageCountResponseModel`, где **result** — это количество непрочитанных сообщений.
+Если при запросе произошел сбой, то в **error** будет передан `ChatApiResponseErrorModel` с описанием ошибки.
 
-**getNewMessages** работает аналогичным образом, но при повторном запросе предыдущие сообщения уже не возвращаются.
-Перед использование методов, нужно указать `apiToken`.
+##
 
-```java
-Map<String, dynamic> data = await ChatView.getNewMessages();
-Map<String, dynamic> data = await ChatView.getUnreadedMessages();
-```
-Формат `data` аналогичен ответу метода /chat/message/getList в Rest Api.
+[//]: # (## Получение token)
+[//]: # (Перейдите в раздел «Интеграция и API - REST API», скопируйте существующий token или добавьте новый.)
+[//]: # (![]&#40;https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2022-11-11_20-54-36.png?raw=true&#41;)
 
-Подробное описание можно прочесть в разделе «Интеграция и API - REST API - Инструкции по подключению».
+[//]: # (## Получение новых сообщений от оператора)
 
-![](https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2022-11-11_20-55-08.png?raw=true)
+[//]: # (Для получения новых сообщений, в `ChatView` есть два статичных метода **getUnreadedMessages** и **getNewMessages**.)
+
+[//]: # ()
+[//]: # (**getUnreadedMessages** - возвращает все непрочитанные сообщения.)
+
+[//]: # ()
+[//]: # (**getNewMessages** работает аналогичным образом, но при повторном запросе предыдущие сообщения уже не возвращаются.)
+
+[//]: # (Перед использование методов, нужно указать `apiToken`.)
+
+[//]: # ()
+[//]: # (```java)
+
+[//]: # (Map<String, dynamic> data = await ChatView.getNewMessages&#40;&#41;;)
+
+[//]: # (Map<String, dynamic> data = await ChatView.getUnreadedMessages&#40;&#41;;)
+
+[//]: # (```)
+
+[//]: # (Формат `data` аналогичен ответу метода /chat/message/getList в Rest Api.)
+
+[//]: # ()
+[//]: # (Подробное описание можно прочесть в разделе «Интеграция и API - REST API - Инструкции по подключению».)
+
+[//]: # ()
+[//]: # (![]&#40;https://github.com/bekannax/OnlineChatSdk-Android/blob/master/images/2022-11-11_20-55-08.png?raw=true&#41;)

@@ -1,7 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class ChatApi {
+@Deprecated("")
+class ChatApiOld {
 
   Future<http.Response> _post(Uri uri, String token, Object? body) async {
     String? jsonBody;
@@ -22,7 +23,7 @@ class ChatApi {
 
   Future<Map<String, dynamic>> _send(String token, String method, Map<String, dynamic>? params) async {
     var result = await _post(
-        Uri.https(await getDomain(), '/json/v1.0/$method'),
+        Uri.https(await _getDomain(), '/json/v1.0/$method'),
         token,
         params
     );
@@ -37,7 +38,7 @@ class ChatApi {
     );
   }
 
-  Future<String> getDomain() async {
+  Future<String> _getDomain() async {
     var response = await http.get(
       Uri.https('operator.me-talk.ru', '/cabinet/assets/operatorApplication/checkConnection.json'),
     );

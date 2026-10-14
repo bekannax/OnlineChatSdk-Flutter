@@ -4,24 +4,19 @@ version: 0.0.1
 homepage:
 
 environment:
-  sdk: ">=3.12.1 <4.0.0"
-#  sdk: '>=2.18.2 <3.0.0'
-#  flutter: ">=1.17.0"
+  sdk: ">=3.13.4 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
   flutter_inappwebview: ^6.2.0-beta.3 # ^6.1.5
-  adaptive_dialog: ^2.8.0 # ^2.4.2
-
-  #flutter_inappwebview:
-  #  path: ./../../../Flutter/flutter_inappwebview-6.0.0-beta.12
-
-  url_launcher: ^6.3.2 # ^6.3.1
-  shared_preferences: ^2.5.5 # ^2.5.3
-  http: ^1.6.0 # ^1.5.0
-  intl: ^0.20.3 # ^0.20.2
+  adaptive_dialog: any
+  url_launcher: ^6.3.3
+  shared_preferences: ^2.5.6
+  http: ^1.6.0
+  intl: ^0.20.3
+  material_ui: ^1.6.0
 
 dev_dependencies:
   flutter_test:

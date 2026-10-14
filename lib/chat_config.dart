@@ -1,94 +1,106 @@
-import 'dart:collection';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatConfig {
 
   static void setLastDateTimeNewMessage(String value) async {
-    (await getInstance())._setConfig(ChatConfig.configKeyLastDateTimeNewMessage, value);
+    await (await getInstance())._setConfig(ChatConfig.configKeyLastDateTimeNewMessage, value);
   }
 
   static Future<String> getLastDateTimeNewMessage() async {
-    return (await getInstance())._getConfigString(ChatConfig.configKeyLastDateTimeNewMessage, "");
+    return await (await getInstance())._getConfigString(ChatConfig.configKeyLastDateTimeNewMessage, "");
+  }
+
+  static void setConfigString({required String key, required String value}) async {
+    await (await getInstance())._setConfig(key, value);
   }
 
   static void setClientId(String clientId) async {
-    (await getInstance())._setConfig(ChatConfig.configKeyClientId, clientId);
+    await (await getInstance())._setConfig(ChatConfig.configKeyClientId, clientId);
   }
 
   static Future<String> getClientId() async {
-    return (await getInstance())._getConfigString(ChatConfig.configKeyClientId, "");
+    return await (await getInstance())._getConfigString(ChatConfig.configKeyClientId, "");
   }
 
-  static void setApiToken(String token) async {
-    if (token.isNotEmpty) {
-      (await getInstance())._setConfig(ChatConfig.configKeyApiToken, token);
-    }
+  static Future<String> getOrgId() async {
+    return await (await getInstance())._getConfigString(ChatConfig.configKeyOrgId, "");
   }
 
-  static Future<String> getApiToken() async {
-    return (await getInstance())._getConfigString(ChatConfig.configKeyApiToken, "");
+  static void setOrgId(String orgId) async {
+    await (await getInstance())._setConfig(ChatConfig.configKeyOrgId, orgId);
   }
 
-  static const String configKeyApiToken = "apiToken";
+  static Future<String> getSiteId() async {
+    return (await getInstance())._getConfigString(ChatConfig.configKeySiteId, "");
+  }
+
+  static void setSiteId(String clientId) async {
+    await (await getInstance())._setConfig(ChatConfig.configKeySiteId, clientId);
+  }
+
   static const String configKeyClientId = "clientId";
   static const String configKeyLastDateTimeNewMessage = "lastDateTimeNewMessage";
+  static const String configKeyOrgId = "orgId";
+  static const String configKeySiteId = "siteId";
   static ChatConfig? _instance;
   
-  late final SharedPreferences _config;
+  SharedPreferences? _config = null;
 
-  Future<void> init() async {
-    _config = await SharedPreferences.getInstance();
+  Future<SharedPreferences> _getConfig() async {
+    if (_config == null) {
+      _config = await SharedPreferences.getInstance();
+    }
+    return _config!;
   }
 
-  void _setConfig(String key, dynamic value) {
+  Future<void> _setConfig(String key, dynamic value) async {
     if (value is bool) {
-      _config.setBool(key, value);
+      await (await _getConfig()).setBool(key, value);
     } else if (value is double) {
-      _config.setDouble(key, value);
+      await (await _getConfig()).setDouble(key, value);
     } else if (value is int) {
-      _config.setInt(key, value);
+      await (await _getConfig()).setInt(key, value);
     } else if (value is String) {
-      _config.setString(key, value);
+      await (await _getConfig()).setString(key, value);
     } else if (value is List<String>) {
-      _config.setStringList(key, value);
+      await (await _getConfig()).setStringList(key, value);
     }
   }
 
-  bool _getConfigBool(String key, bool def) {
-    var result = _config.getBool(key);
+  Future<bool> _getConfigBool(String key, bool def)  async {
+    var result = (await _getConfig()).getBool(key);
     if (result == null) {
       return def;
     }
     return result;
   }
 
-  int _getConfigInt(String key, int def) {
-    var result = _config.getInt(key);
+  Future<int> _getConfigInt(String key, int def) async {
+    var result = (await _getConfig()).getInt(key);
     if (result == null) {
       return def;
     }
     return result;
   }
 
-  double _getConfigDouble(String key, double def) {
-    var result = _config.getDouble(key);
+  Future<double> _getConfigDouble(String key, double def) async {
+    var result = (await _getConfig()).getDouble(key);
     if (result == null) {
       return def;
     }
     return result;
   }
 
-  String _getConfigString(String key, String def) {
-    var result = _config.getString(key);
+  Future<String> _getConfigString(String key, String def) async {
+    var result = (await _getConfig()).getString(key);
     if (result == null) {
       return def;
     }
     return result;
   }
 
-  List<String> _getConfigListString(String key) {
-    var result = _config.getStringList(key);
+  Future<List<String>> _getConfigListString(String key) async {
+    var result = (await _getConfig()).getStringList(key);
     if (result == null) {
       return [];
     }
@@ -98,7 +110,7 @@ class ChatConfig {
   static Future<ChatConfig> getInstance() async {
     if (_instance == null) {
       _instance = ChatConfig();
-      await _instance!.init();
+      await _instance!._getConfig();
     }
     return _instance!;
   }
